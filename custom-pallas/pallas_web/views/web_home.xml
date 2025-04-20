@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_web_home_tree" model="ir.ui.view">
+        <field name="name">web.home.tree</field>
+        <field name="model">web.home</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="tagline"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_web_home_form" model="ir.ui.view">
+        <field name="name">web.home.form</field>
+        <field name="model">web.home</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="tagline"/>
+                        <field name="background_image" widget="image" class="oe_avatar"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_web_home" model="ir.actions.act_window">
+        <field name="name">Web Home</field>
+        <field name="res_model">web.home</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+</odoo>

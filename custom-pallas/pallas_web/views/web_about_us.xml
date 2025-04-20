@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_web_about_us_tree" model="ir.ui.view">
+        <field name="name">web.about.us.tree</field>
+        <field name="model">web.about.us</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false" edit="true" string="About Us">
+                <field name="title"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_web_about_us_form" model="ir.ui.view">
+        <field name="name">web.about.us.form</field>
+        <field name="model">web.about.us</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false" edit="true" string="About Us">
+                <sheet>
+                    <group>
+                        <field name="title"/>
+                        <field name="title_image" widget="image" class="oe_avatar"/>
+                        <field name="tagline"/>
+                        <field name="description"/>
+                    </group>
+                    <notebook>
+                        <page string="Event Images">
+                            <field name="event_images">
+                                <list editable="bottom">
+                                    <field name="image" widget="image" class="oe_avatar"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_web_about_us" model="ir.actions.act_window">
+        <field name="name">About Us</field>
+        <field name="res_model">web.about.us</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

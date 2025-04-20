@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+<!--    Remove original web menu-->
+    <menuitem id="website.menu_site"
+              name="Site"
+              groups="base.group_no_one"
+              parent="website.menu_website_configuration"/>
+    <record id="website.menu_site" model="ir.ui.menu">
+        <field name="active">False</field>
+    </record>
+
+
+    <menuitem
+            id="menu_web"
+            parent="website.menu_website_configuration"
+            name="Web"
+            sequence="21">
+        <menuitem
+                id="web_home"
+                name="Home"
+                action="action_web_home"
+                sequence="1"/>
+        <menuitem
+                id="web_about_us"
+                name="About Us"
+                action="action_web_about_us"
+                sequence="2"/>
+        <menuitem
+                id="web_location"
+                name="Locations"
+                action="action_web_location"
+                sequence="2"/>
+        <menuitem
+                id="web_promo"
+                name="Promo"
+                action="action_web_promo"
+                sequence="2"/>
+
+    </menuitem>
+</odoo>

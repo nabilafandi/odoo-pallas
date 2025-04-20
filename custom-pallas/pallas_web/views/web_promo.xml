@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_web_promo_tree" model="ir.ui.view">
+        <field name="name">web.promo.tree</field>
+        <field name="model">web.promo</field>
+        <field name="arch" type="xml">
+            <list create="false" delete="false" edit="true" string="About Us">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_web_promo_form" model="ir.ui.view">
+        <field name="name">web.promo.form</field>
+        <field name="model">web.promo</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false" edit="true" string="About Us">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="banner_image" widget="image" class="oe_avatar"/>
+                    </group>
+                    <notebook>
+                        <page string="Promo">
+                            <field name="promo_ids">
+                                <list editable="bottom">
+                                    <field name="name" />
+                                    <field name="description" />
+                                    <field name="image" widget="image" class="oe_avatar"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_web_promo" model="ir.actions.act_window">
+        <field name="name">Promo</field>
+        <field name="res_model">web.promo</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

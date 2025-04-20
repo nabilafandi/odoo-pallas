@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_web_about_us,web.about.us,model_web_about_us,base.group_user,1,1,1,1
+access_event_image,event.image,model_event_image,base.group_user,1,1,1,1
+access_web_home,web.home,model_web_home,base.group_user,1,1,1,1
+access_web_location,web.location,model_web_location,base.group_user,1,1,1,1
+access_location_image,location.image,model_location_image,base.group_user,1,1,1,1
+access_web_promo,web.promo,model_web_promo,base.group_user,1,1,1,1
+access_web_promo_line,promo.line,model_promo_line,base.group_user,1,1,1,1
+

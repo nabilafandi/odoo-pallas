@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="sample_web_about_us" model="web.about.us">
+            <field name="title">Tripical Coffee</field>
+            <field name="title_image"></field>
+            <field name="tagline">Your local haven for coffee and people</field>
+            <field name="description">Tripical Coffee is more than just a place to grab a cup of joe. We're a community
+                hub where friends meet, ideas spark, and the aroma of freshly brewed coffee fills the air. With three
+                years of experience in the coffee industry, we've perfected our craft to bring you the finest coffee
+                beverages and a welcoming atmosphere.
+            </field>
+        </record>
+        <record id="sample_web_home" model="web.home">
+            <field name="tagline">Beyond Your Expectation</field>
+        </record>
+        <record id="sample_web_location" model="web.location">
+            <field name="name">Tripical Coffee Jakarta Timur</field>
+            <field name="description">ipsum dolor sit amet consectetur. Est neque urna sollicitudin suspendisse
+                phasellus rhoncus magna. Lorem ipsum dolor sit amet consectetur. Est neque urna sollicitudin suspendisse
+                phasellus rhoncus magna. Lorem ipsum dolor sit amet consectetur. Est neque urna sollicitudin suspendisse
+                phasellus rhoncus magna. Purus nulla lacus diam non risus. Et commodo in velit ut sapien duis etiam et
+                velit. Integer ut amet elit vitae amet. (penjelasan singkat)
+            </field>
+            <field name="address">Komp. Billy Moon, Jl. Janur II Jl. Raya Kalimalang, Pd. Klp., Kec. Duren Sawit, Kota
+                Jakarta Timur, Daerah Khusus Ibukota Jakarta 13450
+            </field>
+            <field name="shop_hour">Mon - Thu
+                : 21.00 - 22.00
+                Fri
+                : 21.00 - 22.00
+                Sat - Sun
+                : 21.00 - 22.00
+            </field>
+            <field name="telephone">+62 8965 7395 010</field>
+            <field name="link_whatsapp"></field>
+            <field name="link_map"></field>
+        </record>
+        <record id="sample_web_promo" model="web.promo">
+            <field name="name">Sample Promo</field>
+        </record>
+
+
+    </data>
+
+</odoo>

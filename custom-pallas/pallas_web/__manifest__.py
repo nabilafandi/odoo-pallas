@@ -1,0 +1,22 @@
+{
+    'name': 'Pallas Web',
+    'author': 'Pallas',
+    'category': 'Web',
+    'version': '1.0.0',
+    'description': """Pallas web""",
+    'summary': '',
+    'sequence': 11,
+    'website': '',
+    'depends': ['website_sale'],
+    'license': 'LGPL-3',
+    'data': [
+        'security/ir.model.access.csv',
+        'views/web_about_us.xml',
+        'views/web_home.xml',
+        'views/web_location.xml',
+        'views/web_promo.xml',
+        'views/product_public_category.xml',
+        'data/pallas_web_admin_menus.xml',
+        'data/records.xml',
+    ],
+}
