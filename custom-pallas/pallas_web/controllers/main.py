@@ -232,4 +232,3 @@ class WebAdminController(http.Controller):
 
         return self._make_json_response(data)
 
-
