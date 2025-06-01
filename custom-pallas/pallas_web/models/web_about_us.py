@@ -10,12 +10,12 @@ class WebAboutUs(models.Model):
     description = fields.Text(string='Description')
     event_images = fields.One2many('event.image', 'about_us_id', string='Events Images')
 
-    @api.model
-    def create(self, vals):
-        # Check if a record already exists
-        if self.search_count([]) >= 1:
-            raise ValidationError("Only one 'About Us' record is allowed.")
-        return super(WebAboutUs, self).create(vals)
+    # @api.model
+    # def create(self, vals):
+    #     # Check if a record already exists
+    #     if self.search_count([]) >= 1:
+    #         raise ValidationError("Only one 'About Us' record is allowed.")
+    #     return super(WebAboutUs, self).create(vals)
 
     _sql_constraints = [
         ('single_record', 'CHECK(1=1)', 'Only one record is allowed.'),

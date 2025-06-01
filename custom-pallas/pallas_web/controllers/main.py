@@ -10,7 +10,10 @@ from odoo.tools import clean_context, float_round, groupby, lazy, single_email_r
 from odoo.osv import expression
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.main import TableCompute
+from odoo.addons.website.controllers.main import QueryURL
+from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo import fields
+from odoo.addons.payment import utils as payment_utils
 
 
 class ProductController(http.Controller):
@@ -25,6 +28,7 @@ class ProductController(http.Controller):
             },
             status=status
         )
+
     def _get_base_url(self):
         """Helper method to get the base URL."""
         return request.httprequest.host_url.rstrip('/')
@@ -32,17 +36,20 @@ class ProductController(http.Controller):
     def _get_record_or_error(self, model_name, error_message, limit=1, id=None):
         """Helper method to fetch a record or return an error response."""
         if not id:
-            record = request.env[model_name].sudo().search([], limit= limit)
+            record = request.env[model_name].sudo().search([], limit=limit)
         else:
             record = request.env[model_name].sudo().browse(id)
         if not record:
             return None, self._make_json_response({'error': error_message}, status=404)
         return record, None
+
     @http.route('/api/product/category', type='http', auth='public', methods=['GET'], csrf=False)
     def get_product_category(self, **kwargs):
-        categories, error_response = self._get_record_or_error('product.public.category', 'No information found.', limit=0)
+        categories, error_response = self._get_record_or_error('product.public.category', 'No information found.',
+                                                               limit=0)
         if error_response:
             return error_response
+
         def process_category(category):
             """Recursively process a category and its children."""
             return {
@@ -58,7 +65,7 @@ class ProductController(http.Controller):
     @http.route('/api/product/category/<int:category_id>', type='http', auth='public', methods=['GET'], csrf=False)
     def get_product_by_category(self, category_id, **kwargs):
         category = request.env['product.public.category'].sudo().browse(category_id)
-        products = request.env['product.template'].sudo().search([('public_categ_ids','=',category_id)])
+        products = request.env['product.template'].sudo().search([('public_categ_ids', '=', category_id)])
         if not category:
             return self._make_json_response({'error': 'No information found.'}, status=404)
 
@@ -73,7 +80,8 @@ class ProductController(http.Controller):
                 "name": product.name,
                 "description": product.description,
                 "price": product.list_price,
-                "images": product.product_template_image_ids.mapped(lambda r: { "id": r.id, "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
+                "images": product.product_template_image_ids.mapped(lambda r: {"id": r.id,
+                                                                               "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
             })
         return self._make_json_response(data)
 
@@ -89,13 +97,15 @@ class ProductController(http.Controller):
             "name": product.name,
             "description": product.description_ecommerce,
             "price": product.list_price,
-            "images": product.product_template_image_ids.mapped(lambda r: {"id": r.id,"image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
+            "images": product.product_template_image_ids.mapped(lambda r: {"id": r.id,
+                                                                           "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
             "related_products": product.alternative_product_ids.mapped(lambda r: {
                 "id": r.id,
                 "name": r.name,
                 "description": r.description,
                 "price": r.list_price,
-                "images": r.product_template_image_ids.mapped(lambda i: {"id": i.id, "image_url": f"{base_url}/web/image/{i._name}/{i.id}/image_1920" if i.image_1920 else None})
+                "images": r.product_template_image_ids.mapped(lambda i: {"id": i.id,
+                                                                         "image_url": f"{base_url}/web/image/{i._name}/{i.id}/image_1920" if i.image_1920 else None})
             }),
             "variants": product.product_variant_ids.mapped(lambda v: {
                 "id": v.id,
@@ -106,8 +116,10 @@ class ProductController(http.Controller):
                 }),
                 "price": v.list_price,
             }),
-            "attributes": product.attribute_line_ids.mapped(lambda l: {"id": l.attribute_id.id,"name": l.attribute_id.name, "values": l.value_ids.mapped(lambda v: {"id": v.id, "name": v.name}),
-        })
+            "attributes": product.attribute_line_ids.mapped(
+                lambda l: {"id": l.attribute_id.id, "name": l.attribute_id.name,
+                           "values": l.value_ids.mapped(lambda v: {"id": v.id, "name": v.name}),
+                           })
         }
         return self._make_json_response(data)
 
@@ -172,10 +184,13 @@ class WebAdminController(http.Controller):
         data = {
             'company_name': request.env.user.company_id.name,
             'title': about_us.title,
-            'title_image_url': self._get_public_image_url('web.about.us', about_us.id, 'title_image') if about_us.title_image else None,            'tagline': about_us.tagline,
+            'title_image_url': self._get_public_image_url('web.about.us', about_us.id,
+                                                          'title_image') if about_us.title_image else None,
+            'tagline': about_us.tagline,
             'description': about_us.description,
             'event_images': [
-                {'id': img.id, 'url': self._get_public_image_url(img._name, img.id, 'image')} for img in about_us.event_images
+                {'id': img.id, 'url': self._get_public_image_url(img._name, img.id, 'image')} for img in
+                about_us.event_images
             ]
         }
 
@@ -190,7 +205,8 @@ class WebAdminController(http.Controller):
         base_url = self._get_base_url()
         data = {
             'tagline': home.tagline,
-            'background_image': self._get_public_image_url('web.home', home.id, 'background_image') if home.background_image else None,
+            'background_image': self._get_public_image_url('web.home', home.id,
+                                                           'background_image') if home.background_image else None,
         }
 
         return self._make_json_response(data)
@@ -212,9 +228,9 @@ class WebAdminController(http.Controller):
             'link_map': location.link_map,
             'location_images': [
                 {
-                    'id': img.id, 
+                    'id': img.id,
                     'url': self._get_public_image_url(img._name, img.id, 'image') if img.image else None,
-                    }
+                }
                 for img in location.location_images
             ],
         }
@@ -230,12 +246,13 @@ class WebAdminController(http.Controller):
         base_url = self._get_base_url()
         data = {
             "name": promo.name,
-            "banner_image": self._get_public_image_url('web.promo', promo.id, 'banner_image') if promo.banner_image else None,
+            "banner_image": self._get_public_image_url('web.promo', promo.id,
+                                                       'banner_image') if promo.banner_image else None,
             "promo_lines": [
-                {"id": line.id, "name": line.name, "description": line.description, 
-                "image_url":self._get_public_image_url(line._name, line.id, 'image') if line.image else None,
-                # "image_url":f"{base_url}/web/image/{line._name}/{line.id}/image",
-                }
+                {"id": line.id, "name": line.name, "description": line.description,
+                 "image_url": self._get_public_image_url(line._name, line.id, 'image') if line.image else None,
+                 # "image_url":f"{base_url}/web/image/{line._name}/{line.id}/image",
+                 }
                 for line in promo.promo_ids
             ]
         }
@@ -244,6 +261,174 @@ class WebAdminController(http.Controller):
 
 
 class CustomWebsiteSale(WebsiteSale):
+    def _get_base_url(self):
+        """Helper method to get the base URL."""
+        return request.httprequest.host_url.rstrip('/')
+
+    @http.route('/api/cart/view', type='http', auth='user', website=True, methods=['GET'], csrf=False)
+    def cart_view(self, **kwargs):
+        base_url = self._get_base_url()
+        print('selfenv user', request.env.user)
+        order = request.website.sale_get_order()
+        if order and order.state != 'draft':
+            request.session['sale_order_id'] = None
+            order = request.website.sale_get_order()
+        request.session['website_sale_cart_quantity'] = order.cart_quantity
+        cart_items = order.website_order_line
+        order_lines = []
+        for item in cart_items:
+            line_vals = {
+                'line_id': item.id,
+                'product_id': item.product_id.id,
+                'image': item.product_id.product_template_image_ids.mapped(lambda r: {"id": r.id,
+                                                                                      "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, })[
+                    0],
+                'name': item.name_short,
+                'quantity': item.product_qty,
+                'price_unit': item.price_unit,
+                'subtotal': item._get_cart_display_price(),
+            }
+            order_lines.append(line_vals)
+        cart = {
+            'order_id': order.id,
+            'total': order.amount_total,
+            'lines': order_lines,
+        }
+        return self._make_json_response(cart)
+
+    @http.route(['/api/cart/update'], type='http', auth="public", methods=['POST'], website=True)
+    def cart_update_json(self, product_id=None, line_id=None, add_qty=None, set_qty=None, display=True,
+                         product_custom_attribute_values=None, no_variant_attribute_value_ids=None, **kwargs):
+
+        payload = json.loads(request.httprequest.data.decode('utf-8'))
+        print('payload', payload)
+        product_id = payload['product_id']
+        line_id = payload['line_id']
+        add_qty = payload.get('add_qty')
+        set_qty = payload.get('set_qty')
+        display = payload.get('display')
+        product_custom_attribute_values = payload.get('product_custom_attribute_values')
+        no_variant_attribute_value_ids = payload.get('no_variant_attribute_value_ids')
+
+        """
+        This route is called :
+            - When changing quantity from the cart.
+            - When adding a product from the wishlist.
+            - When adding a product to cart on the same page (without redirection).
+        """
+        order = request.website.sale_get_order(force_create=True)
+        if order.state != 'draft':
+            request.website.sale_reset()
+            if kwargs.get('force_create'):
+                order = request.website.sale_get_order(force_create=True)
+            else:
+                return {}
+
+        if product_custom_attribute_values:
+            product_custom_attribute_values = json_scriptsafe.loads(product_custom_attribute_values)
+
+        # old API, will be dropped soon with product configurator refactorings
+        no_variant_attribute_values = kwargs.pop('no_variant_attribute_values', None)
+        if no_variant_attribute_values and no_variant_attribute_value_ids is None:
+            no_variants_attribute_values_data = json_scriptsafe.loads(no_variant_attribute_values)
+            no_variant_attribute_value_ids = [
+                int(ptav_data['value']) for ptav_data in no_variants_attribute_values_data
+            ]
+
+        values = order._cart_update(
+            product_id=product_id,
+            line_id=line_id,
+            add_qty=add_qty,
+            set_qty=set_qty,
+            product_custom_attribute_values=product_custom_attribute_values,
+            no_variant_attribute_value_ids=no_variant_attribute_value_ids,
+            **kwargs
+        )
+        # If the line is a combo product line, and it already has combo items, we need to update
+        # the combo item quantities as well.
+        line = request.env['sale.order.line'].browse(values['line_id'])
+        if line.product_type == 'combo' and line.linked_line_ids:
+            for linked_line_id in line.linked_line_ids:
+                if values['quantity'] != linked_line_id.product_uom_qty:
+                    order._cart_update(
+                        product_id=linked_line_id.product_id.id,
+                        line_id=linked_line_id.id,
+                        set_qty=values['quantity'],
+                    )
+
+        values['notification_info'] = self._get_cart_notification_information(order, [values['line_id']])
+        values['notification_info']['warning'] = values.pop('warning', '')
+        request.session['website_sale_cart_quantity'] = order.cart_quantity
+
+        if not order.cart_quantity:
+            request.website.sale_reset()
+            return values
+
+        values['cart_quantity'] = order.cart_quantity
+        values['minor_amount'] = payment_utils.to_minor_currency_units(
+            order.amount_total, order.currency_id
+        )
+        values['amount'] = order.amount_total
+
+        if not display:
+            return values
+
+        values['cart_ready'] = order._is_cart_ready()
+        values['website_sale.cart_lines'] = request.env['ir.ui.view']._render_template(
+            "website_sale.cart_lines", {
+                'website_sale_order': order,
+                'date': fields.Date.today(),
+                'suggested_products': order._cart_accessories()
+            }
+        )
+        values['website_sale.total'] = request.env['ir.ui.view']._render_template(
+            "website_sale.total", {
+                'website_sale_order': order,
+            }
+        )
+        return values
+
+    @http.route(['/api/cart/add'], type='http', auth="public", methods=['POST'], website=True)
+    def cart_update(
+            self, product_id, add_qty=1, set_qty=0, product_custom_attribute_values=None,
+            no_variant_attribute_value_ids=None, **kwargs
+    ):
+        payload = json.loads(request.httprequest.data.decode('utf-8'))
+        product_id = payload['product_id']
+        add_qty = payload.get('add_qty')
+        set_qty = payload.get('set_qty')
+        product_custom_attribute_values = payload.get('product_custom_attribute_values')
+        no_variant_attribute_value_ids = payload.get('no_variant_attribute_value_ids')
+
+        """This route is called when adding a product to cart (no options)."""
+        sale_order = request.website.sale_get_order(force_create=True)
+        if sale_order.state != 'draft':
+            request.session['sale_order_id'] = None
+            sale_order = request.website.sale_get_order(force_create=True)
+
+        if product_custom_attribute_values:
+            product_custom_attribute_values = json_scriptsafe.loads(product_custom_attribute_values)
+
+        # old API, will be dropped soon with product configurator refactorings
+        no_variant_attribute_values = kwargs.pop('no_variant_attribute_values', None)
+        if no_variant_attribute_values and no_variant_attribute_value_ids is None:
+            no_variants_attribute_values_data = json_scriptsafe.loads(no_variant_attribute_values)
+            no_variant_attribute_value_ids = [
+                int(ptav_data['value']) for ptav_data in no_variants_attribute_values_data
+            ]
+
+        sale_order._cart_update(
+            product_id=int(product_id),
+            add_qty=add_qty,
+            set_qty=set_qty,
+            product_custom_attribute_values=product_custom_attribute_values,
+            no_variant_attribute_value_ids=no_variant_attribute_value_ids,
+            **kwargs
+        )
+
+        request.session['website_sale_cart_quantity'] = sale_order.cart_quantity
+
+        return request.redirect("/shop/cart")
 
     def _make_json_response(self, data, status=200):
         """Helper method to create a JSON response with common headers."""
@@ -258,6 +443,7 @@ class CustomWebsiteSale(WebsiteSale):
             },
             status=status
         )
+
     def sitemap_shop(env, rule, qs):
         website = env['website'].get_current_website()
         if website and website.ecommerce_access == 'logged_in' and not qs:
@@ -275,6 +461,7 @@ class CustomWebsiteSale(WebsiteSale):
             loc = '/shop/category/%s' % env['ir.http']._slug(cat)
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
+
     @http.route('/shop/route', type='http', auth="public", website=True, sitemap=sitemap_shop)
     def shop_json(self, page=0, category=None, search='', min_price=0.0, max_price=0.0, ppg=False, **post):
         if not request.website.has_ecommerce_access():
@@ -330,14 +517,16 @@ class CustomWebsiteSale(WebsiteSale):
                 post['tags'] = None
                 tags = {}
 
-        keep = QueryURL('/shop', **self._shop_get_query_url_kwargs(category and int(category), search, min_price, max_price, **post))
+        keep = QueryURL('/shop',
+                        **self._shop_get_query_url_kwargs(category and int(category), search, min_price, max_price,
+                                                          **post))
 
         now = datetime.timestamp(datetime.now())
         pricelist = website.pricelist_id
         if 'website_sale_pricelist_time' in request.session:
             # Check if we need to refresh the cached pricelist
             pricelist_save_time = request.session['website_sale_pricelist_time']
-            if pricelist_save_time < now - 60*60:
+            if pricelist_save_time < now - 60 * 60:
                 request.session.pop('website_sale_current_pl', None)
                 website.invalidate_recordset(['pricelist_id'])
                 pricelist = website.pricelist_id
@@ -368,7 +557,8 @@ class CustomWebsiteSale(WebsiteSale):
             display_currency=website.currency_id,
             **post
         )
-        fuzzy_search_term, product_count, search_product = self._shop_lookup_products(attrib_set, options, post, search, website)
+        fuzzy_search_term, product_count, search_product = self._shop_lookup_products(attrib_set, options, post, search,
+                                                                                      website)
 
         filter_by_price_enabled = website.is_view_active('website_sale.filter_products_price')
         if filter_by_price_enabled:
@@ -497,7 +687,7 @@ class CustomWebsiteSale(WebsiteSale):
         values.update(self._get_additional_extra_shop_values(values, **post))
         print(values)
 
-        return self._make_json_response(values,200)
+        return self._make_json_response(values, 200)
 
     @http.route('/api/cart/add', type='http', auth='public', methods=['POST'], csrf=False)
     def add_to_cart(self, product_id=None, quantity=1, **kwargs):
