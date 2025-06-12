@@ -302,15 +302,23 @@ class CustomWebsiteSale(WebsiteSale):
                          product_custom_attribute_values=None, no_variant_attribute_value_ids=None, **kwargs):
 
         payload = json.loads(request.httprequest.data.decode('utf-8'))
-        print('payload', payload)
-        product_id = payload['product_id']
-        line_id = payload['line_id']
+        product_id = payload.get('product_id')
+        product_template_id = payload.get('product_template_id')
+        attribute_value_ids = payload.get('attribute_value_ids')
+        line_id = payload.get('line_id')
         add_qty = payload.get('add_qty')
         set_qty = payload.get('set_qty')
         display = payload.get('display')
         product_custom_attribute_values = payload.get('product_custom_attribute_values')
         no_variant_attribute_value_ids = payload.get('no_variant_attribute_value_ids')
 
+        if product_template_id and attribute_value_ids:
+            product_template = request.env['product.template'].browse(product_template_id)
+            template_attribute_values = request.env['product.template.attribute.value'].search([
+                ('product_tmpl_id', '=', product_template.id),
+                ('product_attribute_value_id', 'in', attribute_value_ids)
+            ])
+            product_id = product_template._get_variant_id_for_combination(template_attribute_values)
         """
         This route is called :
             - When changing quantity from the cart.
