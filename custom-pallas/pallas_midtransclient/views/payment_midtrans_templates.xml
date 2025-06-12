@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="redirect_form">
+         <div t-name="payment_provider_midtrans">
+            <form t-attf-action="{{ redirect_url }}" method="get" id="midtrans_redirect_form">
+                <input type="hidden" name="token" t-att-value="midtrans_token"/>
+                <input type="hidden" name="client_key" t-att-value="client_key"/>
+            </form>
+
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.getElementById('midtrans_redirect_form').submit();
+                });
+            </script>
+        </div>
+    </template>
+
+</odoo>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="sale_order_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <header position="inside">
+                    <button name="action_midtrans_payment" string="Pay with Midtrans" type="object" class="btn-primary"/>
+                </header>
+
+            </field>
+        </record>
+    </data>
+</odoo>

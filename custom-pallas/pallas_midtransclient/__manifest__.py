@@ -1,0 +1,21 @@
+{
+    'name': 'Pallas Midtrans Client',
+    'author': 'Pallas',
+    'category': 'Web',
+    'version': '1.0.0',
+    'description': """Pallas Midtrans Client""",
+    'summary': '',
+    'sequence': 11,
+    'website': '',
+    'depends': ['payment'],
+    'license': 'LGPL-3',
+    'data': [
+        'views/payment_midtrans_templates.xml',
+        'data/payment_provider_data.xml',
+        # 'views/sale_order.xml',
+        'views/payment_provider_views.xml',
+        # 'security/ir.model.access.csv',
+    ],
+    'post_init_hook': 'post_init_hook',
+    'uninstall_hook': 'uninstall_hook',
+}
