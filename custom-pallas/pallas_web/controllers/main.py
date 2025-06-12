@@ -266,10 +266,12 @@ class CustomWebsiteSale(WebsiteSale):
         """Helper method to get the base URL."""
         return request.httprequest.host_url.rstrip('/')
 
-    @http.route('/api/cart/view', type='http', auth='user', website=True, methods=['GET'], csrf=False)
+    @http.route('/api/cart/view', type='http', auth='public', website=True, methods=['GET'], csrf=False)
     def cart_view(self, **kwargs):
         base_url = self._get_base_url()
-        print('selfenv user', request.env.user)
+        if not request.website.has_ecommerce_access():
+            return request.redirect('/web/login')
+
         order = request.website.sale_get_order()
         if order and order.state != 'draft':
             request.session['sale_order_id'] = None
