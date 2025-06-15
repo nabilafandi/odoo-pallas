@@ -52,5 +52,5 @@ class PaymentProvider(models.Model):
             return snap_response
         except Exception as e:
             print(e)
-            self.status = e
-            return False
+            raise ValidationError(e)
+            # return False
