@@ -57,7 +57,7 @@ class MidtransController(http.Controller):
 
             if post['status'] == 'success':
                 tx._set_done()
-                tx._post_process_after_done()
+                tx._post_process()
             elif post['status'] == 'pending':
                 tx._set_pending()
             else:
@@ -107,7 +107,7 @@ class MidtransController(http.Controller):
             else:
                 _logger.warning("Unknown Midtrans status: %s", transaction_status)
 
-            tx._post_process_after_done()
+            tx._post_process()
             return {'status': 'ok'}
         except Exception as e:
             _logger.error("Notification processing failed: %s", str(e))

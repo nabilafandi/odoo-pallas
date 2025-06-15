@@ -16,6 +16,11 @@ from odoo import fields
 from odoo.addons.payment import utils as payment_utils
 
 
+def get_base_url():
+    """Helper method to get the base URL."""
+    return "http://145.79.13.25:8069"
+    # return request.httprequest.host_url.rstrip('/')
+
 class ProductController(http.Controller):
 
     def _make_json_response(self, data, status=200):
@@ -29,9 +34,7 @@ class ProductController(http.Controller):
             status=status
         )
 
-    def _get_base_url(self):
-        """Helper method to get the base URL."""
-        return request.httprequest.host_url.rstrip('/')
+    
 
     def _get_record_or_error(self, model_name, error_message, limit=1, id=None):
         """Helper method to fetch a record or return an error response."""
@@ -73,7 +76,7 @@ class ProductController(http.Controller):
             "category": category.name,
             "products": [],
         }
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         for product in products:
             data['products'].append({
                 "id": product.id,
@@ -91,7 +94,7 @@ class ProductController(http.Controller):
         if not product:
             return self._make_json_response({'error': 'No information found.'}, status=404)
 
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         data = {
             "id": product.id,
             "name": product.name,
@@ -154,7 +157,7 @@ class WebAdminController(http.Controller):
 
     def _get_public_image_url(self, model, rec_id, field):
         """Generate URL for public image access"""
-        return f"{self._get_base_url()}/api/public/image/{model}/{rec_id}/{field}"
+        return f"{get_base_url()}/api/public/image/{model}/{rec_id}/{field}"
 
     @http.route('/api/public/image/<string:model>/<int:id>/<string:field>',
                 type='http', auth="public", methods=['GET'], csrf=False)
@@ -181,7 +184,7 @@ class WebAdminController(http.Controller):
         if error_response:
             return error_response
 
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         data = {
             'company_name': request.env.user.company_id.name,
             'title': about_us.title,
@@ -203,7 +206,7 @@ class WebAdminController(http.Controller):
         if error_response:
             return error_response
 
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         data = {
             'tagline': home.tagline,
             'background_image': self._get_public_image_url('web.home', home.id,
@@ -218,7 +221,7 @@ class WebAdminController(http.Controller):
         if error_response:
             return error_response
 
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         data = {
             'name': location.name,
             'description': location.description,
@@ -244,7 +247,7 @@ class WebAdminController(http.Controller):
         if error_response:
             return error_response
 
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         data = {
             "name": promo.name,
             "banner_image": self._get_public_image_url('web.promo', promo.id,
@@ -268,7 +271,7 @@ class CustomWebsiteSale(WebsiteSale):
 
     @http.route('/api/cart/view', type='http', auth='public', website=True, methods=['GET'], csrf=False)
     def cart_view(self, **kwargs):
-        base_url = self._get_base_url()
+        base_url = get_base_url()
         if not request.website.has_ecommerce_access():
             return request.redirect('/web/login')
 
