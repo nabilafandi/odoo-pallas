@@ -36,6 +36,7 @@ class MidtransController(http.Controller):
 
         # Handle the notification data.
         tx_sudo._handle_notification_data('midtrans', data)
+        tx_sudo._process_payment()
         return request.redirect('/payment/status')
 
 

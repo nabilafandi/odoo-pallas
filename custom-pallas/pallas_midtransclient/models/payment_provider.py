@@ -3,7 +3,6 @@ import midtransclient
 from odoo.addons.pallas_midtransclient import const
 from odoo.exceptions import ValidationError
 
-
 class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
 

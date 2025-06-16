@@ -3,6 +3,7 @@
 import logging
 import pprint
 
+import psycopg2
 from werkzeug import urls
 
 from odoo import _, models
@@ -11,7 +12,7 @@ from odoo.tools import float_round
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.pallas_midtransclient import const
-
+import time
 
 _logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ class PaymentTransaction(models.Model):
         rendering_values = {
             'api_url': invoice_data.get('invoice_url')
         }
-        rendering_values =  {
+        rendering_values = {
             'redirect_url': invoice_data.get('redirect_url'),
             'midtrans_token': invoice_data.get('token'),
             'client_key': self.provider_id.midtrans_client_key,
@@ -94,7 +95,7 @@ class PaymentTransaction(models.Model):
         redirect_url = urls.url_join(base_url, '/payment/status')
         payload = {
             "transaction_details": {
-                "order_id": self.reference,
+                "order_id": f"{self.reference}-midtrans-{time.time()}",
                 "gross_amount": int(self.amount),
             },
             "customer_details": {
@@ -103,7 +104,6 @@ class PaymentTransaction(models.Model):
             },
         }
         return payload
-
 
     def _get_tx_from_notification_data(self, provider_code, notification_data):
         print('notification_data', notification_data)
@@ -120,7 +120,7 @@ class PaymentTransaction(models.Model):
         if provider_code != 'midtrans' or len(tx) == 1:
             return tx
 
-        reference = notification_data.get('order_id')
+        reference = notification_data.get('order_id').split('-midtrans')[0]
         if not reference:
             raise ValidationError("Midtrans: " + _("Received data with missing reference."))
 
@@ -170,3 +170,17 @@ class PaymentTransaction(models.Model):
                 "An error occurred during the processing of your payment (%s). Please try again.",
                 failure_reason,
             ))
+
+    def _process_payment(self):
+        for tx in self:
+            try:
+                tx._post_process()
+                self.env.cr.commit()
+            except psycopg2.OperationalError:
+                self.env.cr.rollback()  # Rollback and try later.
+            except Exception as e:
+                _logger.exception(
+                    "encountered an error while post-processing transaction with reference %s:\n%s",
+                    tx.reference, e
+                )
+                self.env.cr.rollback()
