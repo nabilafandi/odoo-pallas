@@ -145,8 +145,8 @@ class WebAdminController(http.Controller):
 
     def _get_base_url(self):
         """Helper method to get the base URL."""
-        return request.httprequest.host_url.rstrip('/')
-        # return "http://145.79.13.25:8069"
+        # return request.httprequest.host_url.rstrip('/')
+        return "http://145.79.13.25:8069"
 
     def _get_record_or_error(self, model_name, error_message):
         """Helper method to fetch a record or return an error response."""
