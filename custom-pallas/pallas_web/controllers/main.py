@@ -14,6 +14,8 @@ from odoo.addons.website.controllers.main import QueryURL
 from odoo.addons.website.models.ir_http import sitemap_qs2dom
 from odoo import fields
 from odoo.addons.payment import utils as payment_utils
+from odoo.tools.json import scriptsafe as json_scriptsafe
+
 
 
 def get_base_url():
@@ -120,7 +122,9 @@ class ProductController(http.Controller):
                 "price": v.list_price,
             }),
             "attributes": product.attribute_line_ids.mapped(
-                lambda l: {"id": l.attribute_id.id, "name": l.attribute_id.name,
+                lambda l: {"id": l.attribute_id.id,
+                           "name": l.attribute_id.name,
+                           "create_variant": l.attribute_id.create_variant,
                            "values": l.value_ids.mapped(lambda v: {"id": v.id, "name": v.name}),
                            })
         }
@@ -315,7 +319,8 @@ class CustomWebsiteSale(WebsiteSale):
         set_qty = payload.get('set_qty')
         display = payload.get('display')
         product_custom_attribute_values = payload.get('product_custom_attribute_values')
-        no_variant_attribute_value_ids = payload.get('no_variant_attribute_value_ids')
+        no_variant_attribute_values = payload.get('no_variant_attribute_values')
+        print(payload)
 
         if product_template_id and attribute_value_ids:
             product_template = request.env['product.template'].browse(product_template_id)
@@ -324,6 +329,7 @@ class CustomWebsiteSale(WebsiteSale):
                 ('product_attribute_value_id', 'in', attribute_value_ids)
             ])
             product_id = product_template._get_variant_id_for_combination(template_attribute_values)
+
         """
         This route is called :
             - When changing quantity from the cart.
@@ -341,13 +347,31 @@ class CustomWebsiteSale(WebsiteSale):
         if product_custom_attribute_values:
             product_custom_attribute_values = json_scriptsafe.loads(product_custom_attribute_values)
 
+        no_variants_json = []
+        if product_template_id and no_variant_attribute_values:
+            product_template = request.env['product.template'].browse(product_template_id)
+            template_attribute_values = request.env['product.template.attribute.value'].search([
+                ('product_tmpl_id', '=', product_template.id),
+                ('product_attribute_value_id', 'in', no_variant_attribute_values)
+            ])
+            for template_attribute_value in template_attribute_values:
+                vals = {
+                    "custom_product_template_attribute_value_id": template_attribute_value.id,
+                    "attribute_value_name": template_attribute_value.product_attribute_value_id.name,
+                    "value": str(template_attribute_value.id),
+                    "attribute_name": template_attribute_value.attribute_id.name,
+                }
+                no_variants_json.append(vals)
         # old API, will be dropped soon with product configurator refactorings
-        no_variant_attribute_values = kwargs.pop('no_variant_attribute_values', None)
+        no_variant_attribute_values = json.dumps(no_variants_json)
+        print('no_variant_attribute_values',no_variant_attribute_values)
         if no_variant_attribute_values and no_variant_attribute_value_ids is None:
             no_variants_attribute_values_data = json_scriptsafe.loads(no_variant_attribute_values)
             no_variant_attribute_value_ids = [
                 int(ptav_data['value']) for ptav_data in no_variants_attribute_values_data
             ]
+        print('no_variant_attribute_value_ids', no_variant_attribute_value_ids)
+        print('productid', product_id)
 
         values = order._cart_update(
             product_id=product_id,
