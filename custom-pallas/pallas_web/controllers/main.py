@@ -83,8 +83,10 @@ class ProductController(http.Controller):
                 "name": product.name,
                 "description": product.description,
                 "price": product.list_price,
-                "images": [{"id": product.id, "image_url": f"{base_url}/web/image/{product._name}/{product.id}/image_1920" }] + product.product_template_image_ids.mapped(lambda r: {"id": r.id,
-                                                                               "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
+                "images": [{"id": product.id,
+                            "image_url": f"{base_url}/web/image/{product._name}/{product.id}/image_1920"}] + product.product_template_image_ids.mapped(
+                    lambda r: {"id": r.id,
+                               "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
             })
         return self._make_json_response(data)
 
@@ -100,8 +102,9 @@ class ProductController(http.Controller):
             "name": product.name,
             "description": product.description_ecommerce,
             "price": product.list_price,
-            "images": [{"id": product.id, "image_url": f"{base_url}/web/image/{product._name}/{product.id}/image_1920" }]
-                      + product.product_template_image_ids.mapped(lambda r: {"id": r.id, "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
+            "images": [{"id": product.id, "image_url": f"{base_url}/web/image/{product._name}/{product.id}/image_1920"}]
+                      + product.product_template_image_ids.mapped(lambda r: {"id": r.id,
+                                                                             "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
 
             "related_products": product.alternative_product_ids.mapped(lambda r: {
                 "id": r.id,
@@ -286,13 +289,21 @@ class CustomWebsiteSale(WebsiteSale):
         cart_items = order.website_order_line
         order_lines = []
         for item in cart_items:
+            attributes = item.product_no_variant_attribute_value_ids.mapped(lambda r: {
+                'attribute_id': r.id,
+                'attribute_name': r.attribute_id.name,
+                'attribute_value_name': r.product_attribute_value_id.name,
+            })
             line_vals = {
                 'line_id': item.id,
                 'product_id': item.product_id.id,
-                'image': item.product_id.product_template_image_ids.mapped(lambda r: {"id": r.id,
-                                                                                      "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, })[
-                    0],
+                "image":
+                    {
+                        "id": item.id,
+                        "image_url": f"{base_url}/web/image/product.product/{item.product_id.id}/image_1920"
+                    },
                 'name': item.name_short,
+                'attributes': attributes,
                 'quantity': item.product_qty,
                 'price_unit': item.price_unit,
                 'subtotal': item._get_cart_display_price(),
