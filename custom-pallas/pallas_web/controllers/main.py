@@ -17,11 +17,11 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.tools.json import scriptsafe as json_scriptsafe
 
 
-
 def get_base_url():
     """Helper method to get the base URL."""
     return "http://145.79.13.25:8069"
     # return request.httprequest.host_url.rstrip('/')
+
 
 class ProductController(http.Controller):
 
@@ -35,8 +35,6 @@ class ProductController(http.Controller):
             },
             status=status
         )
-
-    
 
     def _get_record_or_error(self, model_name, error_message, limit=1, id=None):
         """Helper method to fetch a record or return an error response."""
@@ -85,7 +83,7 @@ class ProductController(http.Controller):
                 "name": product.name,
                 "description": product.description,
                 "price": product.list_price,
-                "images": product.product_template_image_ids.mapped(lambda r: {"id": r.id,
+                "images": [{"id": product.id, "image_url": f"{base_url}/web/image/{product._name}/{product.id}/image_1920" }] + product.product_template_image_ids.mapped(lambda r: {"id": r.id,
                                                                                "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
             })
         return self._make_json_response(data)
@@ -102,8 +100,9 @@ class ProductController(http.Controller):
             "name": product.name,
             "description": product.description_ecommerce,
             "price": product.list_price,
-            "images": product.product_template_image_ids.mapped(lambda r: {"id": r.id,
-                                                                           "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
+            "images": [{"id": product.id, "image_url": f"{base_url}/web/image/{product._name}/{product.id}/image_1920" }]
+                      + product.product_template_image_ids.mapped(lambda r: {"id": r.id, "image_url": f"{base_url}/web/image/{r._name}/{r.id}/image_1920" if r.image_1920 else None, }),
+
             "related_products": product.alternative_product_ids.mapped(lambda r: {
                 "id": r.id,
                 "name": r.name,
@@ -364,7 +363,7 @@ class CustomWebsiteSale(WebsiteSale):
                 no_variants_json.append(vals)
         # old API, will be dropped soon with product configurator refactorings
         no_variant_attribute_values = json.dumps(no_variants_json)
-        print('no_variant_attribute_values',no_variant_attribute_values)
+        print('no_variant_attribute_values', no_variant_attribute_values)
         if no_variant_attribute_values and no_variant_attribute_value_ids is None:
             no_variants_attribute_values_data = json_scriptsafe.loads(no_variant_attribute_values)
             no_variant_attribute_value_ids = [
