@@ -1,4 +1,4 @@
-$o-community-color: #6e0000 !default; // 🔴 Red or whatever color you want
+$o-community-color: #FF1717 !default; // 🔴 Red or whatever color you want
 $o-white: #FEFEF9 !default;
 
 $o-gray-100: #f0e8db !default;
@@ -11,4 +11,17 @@ $o-gray-700: #493225 !default;
 $o-gray-800: #2f1d14 !default;
 $o-gray-900: #1a1a1a !default;
 
-$o-view-background-color: #FEFEF9 !default;
+$o-view-background-color: #f3ebe8 !default;
+
+
+@font-face {
+   font-family: "Avenir";
+   font-weight: 400;
+   font-style: normal;
+   src: url('/fonts/Avenir-Book.woff') format('woff'),
+        url('/fonts/Avenir-Book.woff2') format('woff2');
+}
+
+
+
+$o-system-fonts: ("Avenir", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif) !default;

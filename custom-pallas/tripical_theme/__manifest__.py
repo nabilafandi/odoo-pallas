@@ -10,6 +10,9 @@
         'web._assets_primary_variables': [
             ('prepend', 'tripical_theme/static/src/scss/primary_variables.scss'),
         ],
+        'web.assets_frontend': [
+            'tripical_theme/static/src/scss/font.scss',
+        ],
     },
     'installable': True,
     'application': True,
