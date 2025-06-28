@@ -772,3 +772,45 @@ class CustomWebsiteSale(WebsiteSale):
             'product_id': product_id,
             'quantity': quantity
         }, status=200)
+
+class CompanyInfo(http.Controller):
+    def _make_json_response(self, data, status=200):
+        """Helper method to create a JSON response with common headers."""
+        return request.make_response(
+            json.dumps(data),
+            headers={
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+            },
+            status=status
+        )
+
+    @http.route('/api/company', type='http', auth='public', methods=['GET'], csrf=False)
+    def get_company_info(self, **kwargs):
+        company = request.env['res.company'].sudo().browse(1)
+        company_info = {
+            'name': company.name,
+            'email': company.email,
+            'phone': company.phone,
+            'website': company.website,
+            'street': company.street,
+            'street2': company.street2,
+            'zip': company.zip,
+            'city': company.city,
+            'state': company.state_id.name if company.state_id else None,
+            'country': company.country_id.name if company.country_id else None,
+        }
+        social =  {
+                'twitter': company.social_twitter,
+                'facebook': company.social_facebook,
+                'github': company.social_github,
+                'linkedin': company.social_linkedin,
+                'youtube': company.social_youtube,
+                'instagram': company.social_instagram,
+                'tiktok': company.social_tiktok,
+            }
+
+        company_info['social'] = social
+
+
+        return self._make_json_response(company_info)
