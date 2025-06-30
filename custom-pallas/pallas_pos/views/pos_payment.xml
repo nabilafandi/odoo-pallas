@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="pos_payment_search_inherit" model="ir.ui.view">
+            <field name="name">pos_payment_search_inherit</field>
+            <field name="model">pos.payment</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_payment_search"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='group_by_session']" position="after">
+                    <filter name="ggroup_by_date" string="Date" domain="[]"  context="{'group_by':'create_date'}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

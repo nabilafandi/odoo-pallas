@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="report_pos_order_search_inherit" model="ir.ui.view">
+            <field name="name">report_pos_order_search_inherit</field>
+            <field name="model">report.pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_report_pos_order_search"/>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='date']" position="replace">
+                    <filter name="filter_date_range" string="Date Range">
+                        <field name="date" operator="&gt;=" context="{'form_view_ref': False}"/>
+                        <field name="date" operator="&lt;=" context="{'form_view_ref': False}"/>
+                    </filter>
+                </xpath>
+
+                <!-- Option 2: Alternative implementation with proper filter syntax -->
+                <xpath expr="//search" position="inside">
+                    <filter name="custom_date_range" string="Custom Date Range">
+                        <field name="date" widget="daterange"
+                               options="{'start_date_field': 'start_date', 'end_date_field': 'end_date'}"/>
+                    </filter>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
