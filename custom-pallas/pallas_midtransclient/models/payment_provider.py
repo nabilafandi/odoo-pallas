@@ -40,7 +40,7 @@ class PaymentProvider(models.Model):
     def _midtrans_make_request(self,payload):
         print('payload', payload)
         snap = midtransclient.Snap(
-            is_production=False,
+            is_production=True,
             server_key=self.midtrans_server_key,
         )
 
