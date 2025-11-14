@@ -19,8 +19,8 @@ from odoo.tools.json import scriptsafe as json_scriptsafe
 
 def get_base_url():
     """Helper method to get the base URL."""
-    return "http://145.79.13.25:8069"
-    # return request.httprequest.host_url.rstrip('/')
+    # return "http://145.79.13.25:8069"
+    return request.httprequest.host_url.rstrip('/')
 
 
 class ProductController(http.Controller):
